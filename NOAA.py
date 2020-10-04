@@ -1,6 +1,7 @@
 import requests
 import json
 import pandas as pd
+import loop_result
 
 token = input('Enter your NOAA token: ')
 
@@ -44,9 +45,15 @@ params = {
     'enddate': '2019-12-31'
 }
 
-r = requests.get('https://www.ncdc.noaa.gov/cdo-web/api/v2/data/', headers = headers, params = params)
+all_weather = loop_result.get_all_results(
+    url='https://www.ncdc.noaa.gov/cdo-web/api/v2/data/',
+    headers=headers,
+    parameters=params
+)
+print(all_weather)
+# r = requests.get('https://www.ncdc.noaa.gov/cdo-web/api/v2/data/', headers = headers, params = params)
 
 def process_json(json_text):
     return json.dumps(json.loads(json_text), indent=3, sort_keys=True)
 
-print(process_json(r.text))
+#print(process_json(r.text))
