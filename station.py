@@ -5,7 +5,6 @@ import math
 import time
 import pandas as pd
 
-
 class StationDataRequest:
     def __init__(self, station_id, api_key, start_date, end_date):
         # Request parameters and headers
@@ -70,9 +69,9 @@ class StationDataRequest:
         for year in all_years:
             while True:
                 results.extend(self._get_next_result_set(year))
-                if self._RECORD_COUNT == 0:
+                if self._RECORD_COUNT == 0: # No Results
                     break
-                if self._CURRENT_PAGE >= self._RECORD_COUNT/self._RECORDS_PER_PAGE:
+                if self._CURRENT_PAGE >= self._RECORD_COUNT/self._RECORDS_PER_PAGE: # Last page
                     break
                 print('Next Page')
                 print(self._CURRENT_PAGE, ':', self._RECORD_COUNT/self._RECORDS_PER_PAGE, sep='')
