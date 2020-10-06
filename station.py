@@ -8,9 +8,12 @@ import pandas as pd
 def list_years(start_date, end_date):
     """Retrieve the years between the provided start date and end date
 
-    :param start_date: The date to start the list at
-    :param end_date: The date to end the list at
-    :return: A list containing all years between the provided start date and end date
+    args:
+        start_date (datetime): The date to start at
+        end_date (datetime): The date to end at
+
+    returns:
+        A list of integers containing all years between the provided start and end ate
     """
     years = math.ceil((end_date - start_date).days / 365)
     start_year = int(start_date.strftime('%Y'))
@@ -18,14 +21,17 @@ def list_years(start_date, end_date):
 
 
 class StationDataRequest:
-    """
+    """An object for requesting data from the NOAA about a station
 
+    attributes:
+        _RESULTS (obj); A List object containing all of the results retrieved
     """
     def __init__(self, station_id, api_key):
         """The constructor for a data request for a NOAA station
 
-        :param station_id: The id of the station
-        :param api_key: Your NOAA api key
+        args:
+            station_id (str): The id of the NOAA station. Example GHCND:USC00210075. Stations can be searched for at https://www.ncdc.noaa.gov/data-access/land-based-station-data/find-station
+            api_key (str): Your NOAA api key. You can request a key here: https://www.ncdc.noaa.gov/cdo-web/token
         """
         self._STATION_ID = station_id
         self._API_KEY = api_key
@@ -37,10 +43,10 @@ class StationDataRequest:
         self._RESULTS = []
 
     def parse_response(self, request_data):
-        """Parase the metadata and results from a station data request
+        """Parase the metadata and results from a station data request. Updates the page attributes of the DataRequest object
 
-        :param request_data: The parsed json dictionary object from the response
-        :return: None
+        args:
+            request_data (obj): A parsed json response
         """
         # parse metadata
         metadata = request_data.get('metadata', {})
@@ -58,9 +64,12 @@ class StationDataRequest:
     def request_result_page(self, year, page=None):
         """Get a page of station data from the NOAA api
 
-        :param year: The year of the data
-        :param page: Results can contain multiple pages, this is the page to return
-        :return: The json from the response parsed as a dictionary object
+        args:
+            year (int): The year of data to retrieve
+            page (int): Which page of data to retrieve
+
+        returns:
+            The reponse text as parsed json
         """
         url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/data/'
         headers = {'token': self._API_KEY}
@@ -77,11 +86,12 @@ class StationDataRequest:
         return json.loads(requests.get(url=url, headers=headers, params=parameters).text)
 
     def get_all_pages(self, year):
-        """Retrieve all pages of data collected from a station for a paticular year
+        """Retrieve all pages of data collected from a station for a particular year
 
-        :param year: The year the data is fromo
-        :return: None
+        args:
+            year(int): The year of data to retrieve
         """
+        # pause in order to not hit requests per second limit
         time.sleep(.2)
         print('Retrieving ', year, sep='')
         response = self.request_result_page(year)
@@ -92,11 +102,20 @@ class StationDataRequest:
 
 
 class Station:
+    """An object for an NOAA station
+
+    attributes:
+        latitude (str): The latitude the station is located at.
+        longitude (str): the longitude the station is located at
+        station_name (str): The name of the station
+        temperature_data (obj): The temperature data the station has collected as a list object. Data must be retrieved using the retrieve_temperature_data method
+    """
     def __init__(self, station_id, api_key):
         """The constructor for the station object
 
-        :param station_id: The id of the NOAA station
-        :param api_key: Your NOAA api key
+        args:
+            station_id (str): The id of the NOAA station. Example GHCND:USC00210075. Stations can be searched for at https://www.ncdc.noaa.gov/data-access/land-based-station-data/find-station
+            api_key (str): Your NOAA api key. You can request a key here: https://www.ncdc.noaa.gov/cdo-web/token
         """
         # setup control attributes
         self._API_KEY = api_key
@@ -122,9 +141,8 @@ class Station:
         self.temperature_data = []
 
     def retrieve_temperature_data(self):
-        """Retrieves all the data a station has
+        """Retrieves all the data a station has. Data is populated to the temperature_data attribute
 
-        :return:
         """
         request = StationDataRequest(self._STATION_ID, self._API_KEY)
         for year in list_years(self._MIN_DATA_DATE, self._MAX_DATA_DATE):
