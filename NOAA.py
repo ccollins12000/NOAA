@@ -46,7 +46,8 @@ start_year = int(mindate.strftime('%Y'))
 all_years = [start_year + index for index in range(years)]
 
 params = {
-    'datatypeid':['TMIN','TMAX','TAVG'],
+    #'datatypeid':['TMIN','TMAX','TAVG'],
+    'datatypeid':['TAVG'],
     'stationid': location['id'],
     'datasetid':datasetid,
     'limit':200

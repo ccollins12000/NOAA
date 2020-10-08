@@ -4,6 +4,8 @@ import datetime
 import math
 import time
 import pandas as pd
+from dateutil import parser
+
 
 def list_years(start_date, end_date):
     """Retrieve the years between the provided start date and end date
@@ -74,7 +76,9 @@ class StationDataRequest:
         url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/data/'
         headers = {'token': self._API_KEY}
         parameters = {
+            #'datatypeid': ['TMIN', 'TMAX', 'TAVG'],
             'datatypeid': ['TMIN', 'TMAX', 'TAVG'],
+            'units': 'standard',
             'stationid': self._STATION_ID,
             'datasetid': 'GHCND',
             'limit': 1000,  # maximum is 1000 https://www.ncdc.noaa.gov/cdo-web/webservices/v2#data,
@@ -140,12 +144,16 @@ class Station:
         self.station_name = self._STATION_DATA.get('name', None)
         self.temperature_data = []
 
-    def retrieve_temperature_data(self):
+    def retrieve_temperature_data(self, start_year=None, end_year=None):
         """Retrieves all the data a station has. Data is populated to the temperature_data attribute
 
         """
         request = StationDataRequest(self._STATION_ID, self._API_KEY)
-        for year in list_years(self._MIN_DATA_DATE, self._MAX_DATA_DATE):
+        if start_year is None:
+            start_year = self._MIN_DATA_DATE
+        if end_year is None:
+            end_year = self._MAX_DATA_DATE
+        for year in list_years(start_year, end_year):
             request.get_all_pages(year)
         self.temperature_data = request._RESULTS
 
@@ -153,5 +161,8 @@ class Station:
 if __name__ == '__main__':
     token = input('Enter your NOAA token: ')
     station = Station('GHCND:USC00210075', token)
-    station.retrieve_temperature_data()
-    print(pd.DataFrame(station.temperature_data).head())
+    station.retrieve_temperature_data(datetime.date(2020,1,1),datetime.date(2020,1,2))
+    df = pd.DataFrame(station.temperature_data)
+
+    df['date'] = df['date'].apply(lambda x: parser.parse(x))
+    print(df.head())

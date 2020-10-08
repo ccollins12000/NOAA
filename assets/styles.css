@@ -1,0 +1,14 @@
+.row {
+  display: flex;
+}
+
+.column {
+    display: block;
+}
+
+.api-key {
+    display: table-cell, flex;
+    vertical-align: middle;
+    height: 50px;
+    border: 1px solid red;
+}
