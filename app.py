@@ -18,7 +18,8 @@ app.layout = html.Div([
 
     html.Label('NOAA API Key', id='lbl-api-key', className='filter-label'),
     dcc.Input(value='API_KEY', type='text', id='txt-api-key', className='filter-txt'),
-
+    html.Label('Zip Code: '),
+    dcc.Input(value='55105'),
     dcc.RangeSlider(
         id='date-range',
         min=1860,
