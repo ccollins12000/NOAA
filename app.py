@@ -68,5 +68,6 @@ def retrieve_station_data(n_clicks, api_key, start_year, end_year):
 
         return fig
 
+
 if __name__ == '__main__':
     app.run_server(debug=True)
