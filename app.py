@@ -19,21 +19,15 @@ app.layout = html.Div([
     html.Label('NOAA API Key', id='lbl-api-key', className='filter-label'),
     dcc.Input(value='API_KEY', type='text', id='txt-api-key', className='filter-txt'),
 
-    html.Label('From '),
-    # slider
-    dcc.Dropdown(
-        options=[{'label': year, 'value': year} for year in range(1800, current_date + 1)],
-        value=current_date,
-        id='start-year'
-    ),
-    html.Label('To '),
-    dcc.Dropdown(
-        options=[{'label': year, 'value': year} for year in range(1800, current_date + 1)],
-        value=current_date,
-        id='end-year'
+    dcc.RangeSlider(
+        id='date-range',
+        min=1860,
+        max=current_date,
+        step=50,
+        value=[1860, current_date],
+        marks = {str(year):str(year) for year in range(1800, current_date+1, 20)}
     ),
     html.Button(children='Get Data',n_clicks=0, id='get-data'),
-    html.P(children='Test', id='output-text'),
     dcc.Graph(id='temperatures')
 ], id='controls', className='columns')
 
@@ -42,13 +36,12 @@ app.layout = html.Div([
     Output(component_id='temperatures',component_property='figure'),
     Input(component_id='get-data',component_property='n_clicks'),
     [State(component_id='txt-api-key', component_property='value'),
-     State(component_id='start-year', component_property='value'),
-     State(component_id='end-year', component_property='value')]
+     State(component_id='date-range', component_property='value')]
 )
-def retrieve_station_data(n_clicks, api_key, start_year, end_year):
+def retrieve_station_data(n_clicks, api_key, years):
     if n_clicks > 0:
         Station = station.Station('GHCND:USC00210075', api_key)
-        Station.retrieve_temperature_data(datetime.date(start_year, 1, 1),datetime.date(end_year, 1, 2))
+        Station.retrieve_temperature_data(datetime.date(years[0], 1, 1),datetime.date(years[1], 1, 2))
 
         temp_data = pd.DataFrame(Station.temperature_data)
         temp_data['date'] = temp_data['date'].apply(lambda x: parser.parse(x))
