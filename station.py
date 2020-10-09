@@ -81,7 +81,7 @@ class StationDataRequest:
             'units': 'standard',
             'stationid': self._STATION_ID,
             'datasetid': 'GHCND',
-            'limit': 1000,  # maximum is 1000 https://www.ncdc.noaa.gov/cdo-web/webservices/v2#data,
+            'limit': 100,  # maximum is 1000 https://www.ncdc.noaa.gov/cdo-web/webservices/v2#data,
             'startdate': str(year) + '-01-01',
             'enddate': str(year) + '-12-31'
         }
@@ -114,12 +114,13 @@ class Station:
         station_name (str): The name of the station
         temperature_data (obj): The temperature data the station has collected as a list object. Data must be retrieved using the retrieve_temperature_data method
     """
-    def __init__(self, station_id, api_key):
+    def __init__(self, station_id, api_key, station_data=None):
         """The constructor for the station object
 
         args:
             station_id (str): The id of the NOAA station. Example GHCND:USC00210075. Stations can be searched for at https://www.ncdc.noaa.gov/data-access/land-based-station-data/find-station
             api_key (str): Your NOAA api key. You can request a key here: https://www.ncdc.noaa.gov/cdo-web/token
+            station_data (dict): Parsed JSON response of station metadata.
         """
         # setup control attributes
         self._API_KEY = api_key
@@ -131,7 +132,10 @@ class Station:
         # request station description data
         self._AUTH_HEADER = {'token':self._API_KEY}
         self._STATION_DATA = requests.get(url=self._STATION_DATA_URL, headers=self._AUTH_HEADER)
-        self._STATION_DATA = json.loads(self._STATION_DATA.text)
+        if station_data is None:
+            self._STATION_DATA = json.loads(self._STATION_DATA.text)
+        else:
+            self._STATION_DATA = station_data
 
         # populate station data
         if self._STATION_DATA.get('id', None) is None:
