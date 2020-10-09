@@ -8,6 +8,7 @@ import station
 import pandas as pd
 from dateutil import parser
 import dash.exceptions
+import StationSearch
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -19,7 +20,7 @@ app.layout = html.Div([
     html.Label('NOAA API Key', id='lbl-api-key', className='filter-label'),
     dcc.Input(value='API_KEY', type='text', id='txt-api-key', className='filter-txt'),
     html.Label('Zip Code: '),
-    dcc.Input(value='55105'),
+    dcc.Input(value='55105', id='zip-code'),
     dcc.RangeSlider(
         id='date-range',
         min=1860,
@@ -37,22 +38,28 @@ app.layout = html.Div([
     Output(component_id='temperatures',component_property='figure'),
     Input(component_id='get-data',component_property='n_clicks'),
     [State(component_id='txt-api-key', component_property='value'),
+     State(component_id='zip-code', component_property='value'),
      State(component_id='date-range', component_property='value')]
 )
-def retrieve_station_data(n_clicks, api_key, years):
+def retrieve_station_data(n_clicks, api_key,zip_code, years):
     if n_clicks > 0:
-        Station = station.Station('GHCND:USC00210075', api_key)
-        Station.retrieve_temperature_data(datetime.date(years[0], 1, 1),datetime.date(years[1], 1, 2))
+        StationSearcher = StationSearch.StationSearch(api_key=api_key)
+        StationSearcher.search(zip_code)
 
-        temp_data = pd.DataFrame(Station.temperature_data)
-        temp_data['date'] = temp_data['date'].apply(lambda x: parser.parse(x))
-        fig = px.scatter(x=temp_data['date'],
-                         y=temp_data['value'],
-                         color=temp_data['datatype'])
-        fig.update_xaxes(title='Date')
+        Station = StationSearcher.return_station(station_index=0)
+        if not Station is None:
+            Station.retrieve_temperature_data(datetime.date(years[0], 1, 1),datetime.date(years[1], 1, 2))
 
-        fig.update_yaxes(title='Temperature')
-        return fig
+            temp_data = pd.DataFrame(Station.temperature_data)
+
+            temp_data['date'] = temp_data['date'].apply(lambda x: parser.parse(x))
+            fig = px.scatter(x=temp_data['date'],
+                             y=temp_data['value'],
+                             color=temp_data['datatype'])
+            fig.update_xaxes(title='Date')
+
+            fig.update_yaxes(title='Temperature')
+            return fig
     else:
         fig = px.scatter(x=[1,2],
                          y=[1,2])

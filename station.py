@@ -77,7 +77,7 @@ class StationDataRequest:
         headers = {'token': self._API_KEY}
         parameters = {
             #'datatypeid': ['TMIN', 'TMAX', 'TAVG'],
-            'datatypeid': ['TMIN', 'TMAX', 'TAVG'],
+            'datatypeid': 'TAVG',
             'units': 'standard',
             'stationid': self._STATION_ID,
             'datasetid': 'GHCND',
@@ -164,9 +164,10 @@ class Station:
 
 if __name__ == '__main__':
     token = input('Enter your NOAA token: ')
-    station = Station('GHCND:USC00210075', token)
+    station = Station('GHCND:USC00217379', token)
     station.retrieve_temperature_data(datetime.date(2020,1,1),datetime.date(2020,1,2))
     df = pd.DataFrame(station.temperature_data)
 
+    print(df.head())
     df['date'] = df['date'].apply(lambda x: parser.parse(x))
     print(df.head())

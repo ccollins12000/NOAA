@@ -42,7 +42,7 @@ class StationSearch:
         results = response_parsed['results']
 
         for noaa_station in results:
-            self.found_locations.append(station.Station(noaa_station['id'], token, noaa_station))
+            self.found_locations.append(station.Station(noaa_station['id'], self._API_KEY, noaa_station))
 
     def return_station(self, station_index=0):
         """Return a station from the results of the last search call
@@ -65,3 +65,4 @@ if __name__ == "__main__":
 
     station_found = StationSearcher.return_station(station_index=0)
     print(station_found.station_name)
+    print(station_found._STATION_ID)
