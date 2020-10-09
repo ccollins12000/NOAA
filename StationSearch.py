@@ -1,7 +1,7 @@
 import station
 import requests
 import json
-import bing
+
 
 class StationSearch:
     """A object for searching for NOAA stations
@@ -42,7 +42,6 @@ class StationSearch:
         results = response_parsed['results']
 
         for noaa_station in results:
-            print(noaa_station['id'])
             self.found_locations.append(station.Station(noaa_station['id'], token, noaa_station))
 
     def return_station(self, station_index=0):
@@ -59,19 +58,10 @@ class StationSearch:
 
 if __name__ == "__main__":
     token = input('Enter your NOAA token: ')
-    bing_key = input('Enter your bing key: ')
-    address = input('Enter address or location to search for: ')
-
-    AddressLookup = bing.Geocoder(api_key=bing_key)
-    AddressLookup.search(address)
-
-    address_found = AddressLookup.result
-
-    print(address_found.zip_code)
+    zip_code = input('Enter a zipcode: ')
 
     StationSearcher = StationSearch(api_key=token)
-    StationSearcher.search(address_found.zip_code)
-
+    StationSearcher.search(zip_code)
 
     station_found = StationSearcher.return_station(station_index=0)
     print(station_found.station_name)
