@@ -55,6 +55,7 @@ class StationDataRequest:
         self._RECORD_COUNT = metadata.get('count', 0)
         self._RECORDS_PER_PAGE = metadata.get('limit', 0)
         self._CURRENT_PAGE = metadata.get('offset', 0)
+        print(self._RECORD_COUNT)
         if self._RECORD_COUNT == 0:
             self._PAGES = 0
         else:
@@ -77,7 +78,7 @@ class StationDataRequest:
         headers = {'token': self._API_KEY}
         parameters = {
             #'datatypeid': ['TMIN', 'TMAX', 'TAVG'],
-            'datatypeid': 'TAVG',
+            'datatypeid': ['TMIN',  'TMAX', 'TAVG'],
             'units': 'standard',
             'stationid': self._STATION_ID,
             'datasetid': 'GHCND',
@@ -101,6 +102,7 @@ class StationDataRequest:
         response = self.request_result_page(year)
         self.parse_response(response)
         for page in range(2, self._PAGES + 1):
+            print(page)
             response = self.request_result_page(year, page)
             self.parse_response(response)
 
